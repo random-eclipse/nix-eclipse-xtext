@@ -1,0 +1,20 @@
+
+# eclispe
+
+bin/
+.project
+.settings/
+.classpath
+
+# maven
+
+target/
+
+# xtext
+
+*.jar
+*.xml_gen
+src-gen/
+xtend-gen/
+generated/
+generated-sources/

@@ -1,0 +1,46 @@
+module org.nix.lang.Config
+
+import org.eclipse.xtext.xtext.generator.*
+import org.eclipse.xtext.xtext.generator.model.project.*
+
+var rootPath = ".."
+var baseName = "org.nix.lang"
+var baseURI = "platform:/resource/${baseName}/src/org/nix/lang"
+
+Workflow {
+
+    component = XtextGenerator {
+        configuration = {
+            project = StandardProjectConfig {
+                rootPath = rootPath
+                baseName = baseName
+                createEclipseMetaData = true
+                runtime = {
+                    enabled = true
+                }
+                runtimeTest = {
+                    enabled = true
+                }
+                genericIde = {
+                    enabled = true
+                }
+                eclipsePlugin = {
+                    enabled = true
+                }
+                eclipsePluginTest = {
+                    enabled = true
+                }
+            }
+            code = {
+                encoding = "UTF-8"
+                lineDelimiter = "\n"
+                fileHeader = "// Auto Xtext \${version}"
+            }
+        }
+        language = StandardLanguage {
+            name = "${baseName}.Nix"
+            grammarUri = "${baseURI}/Nix.xtext"
+            fileExtensions = "nix"
+        }
+    }
+}

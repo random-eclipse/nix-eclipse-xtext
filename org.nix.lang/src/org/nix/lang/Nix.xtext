@@ -1,0 +1,91 @@
+grammar org.nix.lang.Nix hidden(SPACE, NOTE)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+//
+generate syntax "http://nixos.org/nix/syntax"
+
+Expr returns Expr:
+//    BindList |
+//    ExprList |
+    => Update | 
+    SetAny |
+    //    Let |
+    //    Group |
+    Name;
+
+    //RootExpr returns Expr:
+ExprList returns Expr:
+    {ExprList} "[" list+=Expr* "]";
+
+Name returns Expr:
+    {Name} tags+=ID ("." tags+=ID)*;
+
+Bind returns Expr:
+    {Bind} name=Name '=' expr=Expr ';';
+
+BindList returns Expr:
+    {BindList} list+=Bind*;
+
+Group returns Expr:
+    {Group} "(" expr=Expr ")";
+
+Let returns Expr:
+    {Let} -> "let" defs=BindList "in" expr=Expr;
+
+SetAny returns Expr:
+    {SetAny} set=(SetSimple | SetRecursive);
+
+SetSimple returns Expr:
+    {SetSimple} "{" defs=BindList "}";
+
+SetRecursive returns Expr:
+    {SetRecursive} "rec" "{" defs=BindList "}";
+
+Update returns Expr:
+    {Update} left=SetAny '//' right=SetAny;
+
+ExprCons returns Expr:
+    {ExprCons} head=Expr tail=ExprList;
+
+Select returns Expr:
+    {Select} expr=Expr '.' name=Name;
+    ///
+//fragment BindList:
+//    bindList+=Bind*;
+
+///
+//terminal SAFE_ID:
+//    'let' | 'rec' | 'in';
+terminal ID:
+    (LETTER | '_') (LETTER | '_' | DIGIT)*;
+
+terminal NUMBER returns ecore::EInt:
+    ('-' | '+')? (DIGIT)+;
+
+terminal fragment ESCAPED_CHAR:
+    '\\' ('n' | 't' | 'r' | '\\');
+
+terminal STRING:
+    '"' (ESCAPED_CHAR | !('\\' | '"'))* '"' |
+    "'" (ESCAPED_CHAR | !('\\' | "'"))* "'";
+
+terminal NOTE:
+    NOTE_MULT | NOTE_SOLO;
+
+terminal fragment NOTE_MULT:
+    '/*'->'*/';
+
+terminal fragment NOTE_SOLO:
+    '#' !('\n' | '\r')* ('\r'? '\n')?;
+
+terminal SPACE:
+    (' ' | '\t' | '\r' | '\n')+;
+
+terminal fragment DIGIT:
+    '0'..'9';
+
+terminal fragment LETTER:
+    'a'..'z' | 'A'..'Z';
+
+terminal ANY:
+    .;
